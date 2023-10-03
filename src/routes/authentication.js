@@ -36,11 +36,22 @@ router.post('/UsersRegisters',async(req,res) => {
 
 router.post('/UsersLogin',async(req,res)=> {
     const {email,contrasena} = req.body;
-    const result = await pool.query('SELECT idContacto FROM Contacto WHERE email=?',[email]);
-    console.log(result[0].idContacto)
-    if(result.length >0){
-        const datos = await pool.query('SELECT idUsuario,idRol FROM Usuario WHERE idContacto=? AND contrasena=?',[result[0].idContacto,contrasena]);
-        res.send(datos);
+    try{
+        const result = await pool.query('SELECT idContacto FROM Contacto WHERE email=?',[email]);
+        console.log(result)
+        if(result.length >0){
+            const datos = await pool.query('SELECT idUsuario,idRol FROM Usuario WHERE idContacto=? AND contrasena=?',[result[0].idContacto,contrasena]);
+            if(datos.length > 0){
+                res.json(datos);
+                return;
+            }
+            res.json({error: 'No coinciden los datos'})
+            return
+        }
+        res.json({error: 'No existe el usuario'})
+        return
+    }catch(err){
+        res.json({ error: err.sqlMessage,query: err.sql});
     }
 })
 
