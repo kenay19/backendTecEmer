@@ -21,7 +21,8 @@ server.use(express.json());
 server.use(cors())
 
 //  Routes
-server.use('/authentication',require(path.join(__dirname, 'routes/authentication.js')))
+server.use('/authentication',require(path.join(__dirname, 'routes/authentication.js')));
+server.use('/medictools',require(path.join(__dirname, 'routes/medictools.js')))
 
 // Global Varables
 // Public Files

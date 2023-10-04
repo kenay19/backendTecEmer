@@ -58,7 +58,7 @@ CREATE TABLE EquipoMedico(
     idEquipoMedico INT AUTO_INCREMENT,
     nombre VARCHAR(50)  NOT NULL,
     estado VARCHAR(50)  NOT NULL,
-    costo  NUMERIC(10,2)  NOT NULL,
+    costo  NUMERIC(5,2)  NOT NULL,
     idVendedor  INT  NOT NULL,
     descripcion  VARCHAR(50),
     PRIMARY KEY(idEquipoMedico),
