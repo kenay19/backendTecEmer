@@ -11,6 +11,18 @@ router.post('/register', async(req,res) => {
     }catch(err){
         res.json({ error: err.sqlMessage,query: err.sql});
     }
+});
+
+
+router.post('/getProducts',  async(req,res) => {
+    const { idVendedor} = req.body;
+    console.log(idVendedor);
+    try{
+        const result = await pool.query('SELECT * FROM EquipoMedico WHERE idVendedor=?',[idVendedor]);
+        res.json(result)
+    }catch(err){
+        res.json({ error: err.sqlMessage,query: err.sql});
+    }
 })
 
 module.exports = router;

@@ -4,7 +4,7 @@ const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
 const cors = require('cors');
-
+const bodyParser = require('body-parser');
 // Initiaizations
 
 const server = express();
@@ -14,7 +14,7 @@ const server = express();
 server.set('port',process.env.PORT || 3000);
 
 // Middlewares
-
+server.use(bodyParser.json())
 server.use(morgan('combined'));
 server.use(express.urlencoded({ extended: false }));
 server.use(express.json());
