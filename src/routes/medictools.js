@@ -16,7 +16,6 @@ router.post('/register', async(req,res) => {
 
 router.post('/getProducts',  async(req,res) => {
     const { idVendedor} = req.body;
-    console.log(idVendedor);
     try{
         const result = await pool.query('SELECT * FROM EquipoMedico WHERE idVendedor=?',[idVendedor]);
         res.json(result)

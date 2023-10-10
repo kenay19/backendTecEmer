@@ -55,10 +55,9 @@ router.post("/UsersLogin", async (req, res) => {
       "SELECT idContacto FROM Contacto WHERE email=?",
       [email]
     );
-    console.log(result);
     if (result.length > 0) {
       const datos = await pool.query(
-        "SELECT idUsuario,idRol FROM Usuario WHERE idContacto=? AND contrasena=?",
+        "SELECT idUsuario,idRol,nombre FROM Usuario,DatosPersonales WHERE idContacto=? AND contrasena=? AND DatosPersonales.idDp=Usuario.idDp",
         [result[0].idContacto, contrasena]
       );
       if (datos.length > 0) {

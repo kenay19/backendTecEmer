@@ -5,8 +5,8 @@ USE Medico;
 CREATE TABLE Direccion(
     idDireccion INT AUTO_INCREMENT,
     calle VARCHAR(50) NOT NULL,
-    inte INT  NOT NULL,
-    exte INT  NOT NULL ,
+    inte VARCHAR(3)  NOT NULL,
+    exte VARCHAR(3)   ,
     colonia VARCHAR(50)  NOT NULL,
     municipio VARCHAR(50)  NOT NULL,
     estado VARCHAR(50)  NOT NULL,
