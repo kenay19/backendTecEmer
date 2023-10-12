@@ -14,10 +14,9 @@ const server = express();
 server.set('port',process.env.PORT || 3000);
 
 // Middlewares
-server.use(bodyParser.json())
 server.use(morgan('combined'));
 server.use(express.urlencoded({ extended: false }));
-server.use(express.json());
+server.use(express.json({limit: '50mb'}));
 server.use(cors())
 
 //  Routes

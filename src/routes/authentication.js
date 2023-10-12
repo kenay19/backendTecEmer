@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../database");
-const sharp = require("sharp");
+const { PythonShell } = require("python-shell");
+const { spawn } = require("child_process");
+const path = require("path");
+const fs = require("fs");
 router.post("/UsersRegisters", async (req, res) => {
   const {
     nombre,
@@ -75,21 +78,33 @@ router.post("/UsersLogin", async (req, res) => {
 });
 
 router.post("/LoginWithFace", (req, res) => {
-  const { img } = req.body;
-  let imagen;
-  console.log(req.body);
-  sharp(img)
-    .raw()
-    .toBuffer()
-    .then((data) => {
-      // `data` contiene la matriz de píxeles de la imagen
-      // Puedes realizar operaciones con `data` según tus necesidades
-      imagen = data;
-    })
-    .catch((error) => {
-      console.error("Error al decodificar la imagen:", error);
-    });
-  res.json(imagen.data);
+  let { img } = req.body;
+  img = Object.values(img);
+  img = [...img,1]
+  const options = {
+    mode: "text",
+    pythonPath:
+      "C:\\Users\\kenay19\\AppData\\Local\\Programs\\Python\\Python311\\python.exe", // Ruta al ejecutable de Python
+    scriptPath: path.join(__dirname, "/python"),
+
+  };
+
+  fs.writeFileSync(path.join(__dirname,'/python/datos.json'),JSON.stringify(img))
+  const pyshell = new PythonShell("reconocimiento.py", options);
+
+  // Captura la salida generada por el script Python
+  pyshell.on("message", (message) => {
+    console.log("Mensaje del script Python:", message);
+  });
+
+  pyshell.end((err, code, signal) => {
+    if (err) {
+      console.error("Error al cargar el modelo:", err);
+    } else {
+      console.log("El script Python ha finalizado.");
+      res.send(signal);
+    }
+  });
 });
 
 module.exports = router;
