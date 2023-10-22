@@ -5,6 +5,56 @@ const { PythonShell } = require("python-shell");
 const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
+const vector = [];
+function generarCaractisticas(img) {
+  return new Promise((resolve, reject) => {
+    img = Object.values(img);
+    img = [...img, 1];
+    const options = {
+      mode: "text",
+      pythonPath:
+        "C:\\Users\\kenay19\\AppData\\Local\\Programs\\Python\\Python311\\python.exe", // Ruta al ejecutable de Python
+      scriptPath: path.join(__dirname, "/python"),
+    };
+
+    fs.writeFileSync(
+      path.join(__dirname, "/python/datos.json"),
+      JSON.stringify(img)
+    );
+    const pyshell = new PythonShell("reconocimiento.py", options);
+
+    const messages = []; // Aquí almacenaremos los mensajes
+
+    pyshell.on("message", (message) => {
+      const numbers = message
+        .replace(/[[\]]/g, "") // Elimina corchetes [ y ]
+        .split(/\s+/) // Divide los números en el mensaje en base a espacios en blanco
+        .map(Number); // Convierte los números en el arreglo a tipo numérico
+      messages.push(numbers); // Agrega los números al arreglo
+    });
+
+    pyshell.on("close", (code) => {
+      resolve(vector);
+    });
+
+    pyshell.end((err, code, signal) => {
+      if (err) {
+        console.error("Error al cargar el modelo:", err);
+      } else {
+        let numeros = [];
+        for (let i = 0; i < messages.length; i++) {
+          numeros.push(messages[i][1], messages[i][2]);
+          if (numeros.length == 2) {
+            vector.push(numeros);
+            numeros = [];
+          }
+        }
+        console.log("El script Python ha finalizado.");
+      }
+    });
+  });
+}
+
 router.post("/UsersRegisters", async (req, res) => {
   const {
     nombre,
@@ -79,32 +129,12 @@ router.post("/UsersLogin", async (req, res) => {
 
 router.post("/LoginWithFace", (req, res) => {
   let { img } = req.body;
-  img = Object.values(img);
-  img = [...img,1]
-  const options = {
-    mode: "text",
-    pythonPath:
-      "C:\\Users\\kenay19\\AppData\\Local\\Programs\\Python\\Python311\\python.exe", // Ruta al ejecutable de Python
-    scriptPath: path.join(__dirname, "/python"),
-
-  };
-
-  fs.writeFileSync(path.join(__dirname,'/python/datos.json'),JSON.stringify(img))
-  const pyshell = new PythonShell("reconocimiento.py", options);
-
-  // Captura la salida generada por el script Python
-  pyshell.on("message", (message) => {
-    console.log("Mensaje del script Python:", message);
+  caraUsar;
+  generarCaractisticas(img).then((result) => {
+    caraUsar = result;
+    // aqui va la logica del logeo
   });
-
-  pyshell.end((err, code, signal) => {
-    if (err) {
-      console.error("Error al cargar el modelo:", err);
-    } else {
-      console.log("El script Python ha finalizado.");
-      res.send(signal);
-    }
-  });
+  // respuesta en caso de no encontrar nada
 });
 
 module.exports = router;

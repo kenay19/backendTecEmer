@@ -25,7 +25,7 @@ server.use('/medictools',require(path.join(__dirname, 'routes/medictools.js')))
 
 // Global Varables
 // Public Files
-
+server.use(express.static(path.join(__dirname,'./public' )))
 
 // Listening Server
 

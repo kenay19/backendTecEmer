@@ -91,3 +91,24 @@ CREATE TABLE DonacionAsignada(
     FOREIGN KEY(idDonacion) REFERENCES ListaDonaciones(idDonacion),
     FOREIGN KEY(idSolicitante) REFERENCES Usuario(idUsuario)
 )ENGINE=InnoDB;
+
+CREATE TABLE VectoresCaracteristicas(
+    idRegistro INT AUTO_INCREMENT,
+    vector1 VARCHAR (255),
+    vector2 VARCHAR (255),
+    vector3 VARCHAR (255),
+    PRIMARY KEY(idRegistro)
+)ENGINE=InnoDB;
+
+CREATE TABLE imagenes(
+    idImagen INT AUTO_INCREMENT,
+    ruta VARCHAR(255),
+    PRIMARY KEY(idImagen)
+)ENGINE=InnoDB;
+
+CREATE TABLE EM_Imagenes(
+    idEquipoMedico INT,
+    idImagen INT,
+    FOREIGN KEY (idEquipoMedico)REFERENCES EquipoMedico(idEquipoMedico),
+    FOREIGN KEY(idImagen) REFERENCES Imagenes(idImagen)
+)ENGINE=InnoDB;
