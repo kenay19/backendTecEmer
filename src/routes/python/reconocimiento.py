@@ -8,14 +8,16 @@ import matplotlib.pyplot as plt
 import sys
 # Obtén la ruta al directorio actual en el que se encuentra el script
 current_dir = os.path.dirname(__file__)
-
-# Construye la ruta al archivo utilizando una ruta relativa
-file_path = os.path.join(current_dir, "datos.json")
-
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor(os.path.join(current_dir,'shape_predictor_68_face_landmarks.dat'))
+if sys.argv[1] == 'login':
+    file = 'login.json'
+elif sys.argv[1] == 'registro':
+    file = 'registro.json'
+file_path = os.path.join(current_dir, file)
 # Leer los datos desde el archivo JSON
 with open(file_path, 'rb') as archivo:
     datos = json.load(archivo)
-
 # Asegurarse de que los datos sean un arreglo
 if not isinstance(datos, list):
     datos = []
@@ -33,40 +35,23 @@ for i in range(len(datos)):
         columns = []
 
 input_image = cv2.cvtColor(np.array(rows,dtype = np.uint8),cv2.COLOR_RGB2BGR)
-
-
-# Cargar el detector de rostros y el predictor facial de dlib
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor(os.path.join(current_dir,'shape_predictor_68_face_landmarks.dat'))
-
-
+input_image = cv2.resize(input_image,(640,480), interpolation=cv2.INTER_CUBIC)
 # Convertir la imagen a escala de grises
 gray = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
-
 # Detectar rostros en la imagen
 faces = detector(gray)
-
 # Verificar si se detectaron rostros
 if len(faces) > 0:
     for face in faces:
         # Obtener los puntos de detección de los 68 landmarks
         landmarks = predictor(gray, face)
-
         # Crear un vector de características de los landmarks
         features = []
         for point in landmarks.parts():
             features.append([point.x, point.y])
-
         # Convertir la lista de características en un arreglo NumPy
         features = np.array(features)
-
         # Dibujar los puntos de detección en la imagen
-        for (x, y) in features:
-            cv2.circle(input_image, (x, y), 2, (0, 255, 0), -1)  # Dibuja un círculo en cada landmark
-
-        
-
-        # Imprimir el vector de características
-        print(features)
+        print(features[1:])
 else:
     print("No se encontraron rostros en la imagen.")

@@ -8,11 +8,9 @@ const bodyParser = require('body-parser');
 // Initiaizations
 
 const server = express();
-
 // Settings
 
 server.set('port',process.env.PORT || 3000);
-
 // Middlewares
 server.use(morgan('combined'));
 server.use(express.urlencoded({ extended: false }));

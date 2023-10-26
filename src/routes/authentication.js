@@ -2,29 +2,25 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../database");
 const { PythonShell } = require("python-shell");
-const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
-const vector = [];
-function generarCaractisticas(img) {
+var vector = [];
+const math = require("math");
+
+function options(file) {
+  return {
+    mode: "text",
+    pythonPath:
+      "C:\\Users\\kenay19\\AppData\\Local\\Programs\\Python\\Python311\\python.exe", // Ruta al ejecutable de Python
+    scriptPath: path.join(__dirname, "/python"),
+    args: file,
+  };
+}
+
+function generateCaracterisitcas(file) {
   return new Promise((resolve, reject) => {
-    img = Object.values(img);
-    img = [...img, 1];
-    const options = {
-      mode: "text",
-      pythonPath:
-        "C:\\Users\\kenay19\\AppData\\Local\\Programs\\Python\\Python311\\python.exe", // Ruta al ejecutable de Python
-      scriptPath: path.join(__dirname, "/python"),
-    };
-
-    fs.writeFileSync(
-      path.join(__dirname, "/python/datos.json"),
-      JSON.stringify(img)
-    );
-    const pyshell = new PythonShell("reconocimiento.py", options);
-
-    const messages = []; // Aquí almacenaremos los mensajes
-
+    const pyshell = new PythonShell("reconocimiento.py", options(file));
+    let messages = []; // Aquí almacenaremos los mensaje
     pyshell.on("message", (message) => {
       const numbers = message
         .replace(/[[\]]/g, "") // Elimina corchetes [ y ]
@@ -32,27 +28,60 @@ function generarCaractisticas(img) {
         .map(Number); // Convierte los números en el arreglo a tipo numérico
       messages.push(numbers); // Agrega los números al arreglo
     });
-
-    pyshell.on("close", (code) => {
-      resolve(vector);
+    pyshell.on("close", () => {
+      let numeros = [];
+      for (let i = 0; i < messages.length; i++) {
+        numeros.push(messages[i][1], messages[i][2]);
+        if (numeros.length == 2) {
+          vector.push(numeros);
+          numeros = [];
+        }
+      }
+      messages = [];
+      resolve(vector); //
+      vector = [];
     });
-
     pyshell.end((err, code, signal) => {
       if (err) {
         console.error("Error al cargar el modelo:", err);
       } else {
-        let numeros = [];
-        for (let i = 0; i < messages.length; i++) {
-          numeros.push(messages[i][1], messages[i][2]);
-          if (numeros.length == 2) {
-            vector.push(numeros);
-            numeros = [];
-          }
-        }
-        console.log("El script Python ha finalizado.");
       }
     });
   });
+}
+
+function reconstruirVectro(vector){
+  let vec = []
+  for(let i = 2; i < vector.length; i+=2){
+    x = parseInt(vector[i]);
+    y = parseInt(vector[i+1]);
+    vec.push([x,y]);
+
+  }
+  return vec
+}
+
+// Función para calcular la similitud del coseno entre dos vectores de características
+function calcularSimilitudCoseno(vector1, vector2) {
+  // Aplanar los vectores
+  const vec1 = vector1.flatMap(([x, y]) => [x, y]);
+  const vec2 = vector2.flatMap(([x, y]) => [x, y]);
+
+  // Calcular el producto escalar entre los vectores
+  const productoEscalar = vec1.reduce((acc, val, index) => acc + val * vec2[index], 0);
+
+  // Calcular la norma (longitud) de los vectores
+  const normaVec1 = Math.sqrt(vec1.reduce((acc, val) => acc + val * val, 0));
+  const normaVec2 = Math.sqrt(vec2.reduce((acc, val) => acc + val * val, 0));
+
+  // Calcular la similitud del coseno
+  const similitudCoseno = productoEscalar / (normaVec1 * normaVec2);
+
+  // Establecer un umbral para determinar la similitud
+  const umbral = 0.998011; // Ajusta este valor según tus necesidades
+  console.log(similitudCoseno)
+  // Retornar true si la similitud supera el umbral, de lo contrario, false
+  return similitudCoseno >= umbral;
 }
 
 router.post("/UsersRegisters", async (req, res) => {
@@ -72,6 +101,11 @@ router.post("/UsersRegisters", async (req, res) => {
     cp,
     idRol,
     contrasena,
+    lat,
+    alt,
+    vector1,
+    vector2,
+    vector3
   } = req.body;
   try {
     const idDp = await pool.query(
@@ -79,8 +113,8 @@ router.post("/UsersRegisters", async (req, res) => {
       [nombre, app, apm]
     );
     const idDireccion = await pool.query(
-      "INSERT INTO Direccion(calle,inte,exte,colonia,municipio,estado,cp)VALUES(?,?,?,?,?,?,?)",
-      [calle, inte, exte, colonia, municipio, estado, cp]
+      "INSERT INTO Direccion(calle,inte,exte,colonia,municipio,estado,cp,alt,lat)VALUES(?,?,?,?,?,?,?,?,?)",
+      [calle, inte, exte, colonia, municipio, estado, cp,alt,lat]
     );
     await pool.query("INSERT INTO Direcciones VALUES(?,?)", [
       idDp.insertId,
@@ -90,9 +124,10 @@ router.post("/UsersRegisters", async (req, res) => {
       "INSERT INTO Contacto(telefonoFijo,celular,email)VALUES(?,?,?)",
       [telefonoFijo, celular, email]
     );
+    const idVector = await pool.query('INSERT INTO VectorCaracteristicas(vector1,vector2,vector3) VALUES(?,?,?)',[vector1,vector2,vector3] )
     const usuario = await pool.query(
-      "INSERT INTO Usuario(contrasena,idDp,idContacto,idRol)VALUES(?,?,?,?)",
-      [contrasena, idDp.insertId, idContacto.insertId, idRol]
+      "INSERT INTO Usuario(contrasena,idDp,idContacto,idRol,idVector)VALUES(?,?,?,?,?)",
+      [contrasena, idDp.insertId, idContacto.insertId, idRol,idVector.insertId]
     );
   } catch (err) {
     res.json({ error: err.sqlMessage, query: err.sql });
@@ -128,13 +163,46 @@ router.post("/UsersLogin", async (req, res) => {
 });
 
 router.post("/LoginWithFace", (req, res) => {
-  let { img } = req.body;
-  caraUsar;
-  generarCaractisticas(img).then((result) => {
-    caraUsar = result;
-    // aqui va la logica del logeo
+  generateCaracterisitcas(req.body.tipo).then((result) => {
+    res.json(result);
   });
-  // respuesta en caso de no encontrar nada
 });
 
+router.post('/LoginFacial',(req, res) => {
+  generateCaracterisitcas(req.body.tipo).then(async(result) => {
+    let vectores = await pool.query('SELECT * FROM VectorCaracteristicas');
+    for(let i = 0 ; i < vectores.length; i++) {
+      vectores[i].vector1 = reconstruirVectro(vectores[i].vector1.split(','))
+      vectores[i].vector2 = reconstruirVectro(vectores[i].vector2.split(','))
+      vectores[i].vector3 = reconstruirVectro(vectores[i].vector3.split(','))
+      if(calcularSimilitudCoseno(vectores[i].vector1,result.slice(-66)) || calcularSimilitudCoseno(vectores[i].vector2,result.slice(-66)) || calcularSimilitudCoseno(vectores[i].vector3,result.slice(-66))){
+        const resultado = await pool.query('SELECT idUsuario,idRol,nombre FROM Usuario,DatosPersonales WHERE Usuario.idVector=? AND Usuario.idDp=DatosPersonales.idDp',[vectores[i].idVector]);
+        res.json(resultado)
+      }
+    }
+    return
+  });
+})
+
+router.post("/CargarImagenesLogin", (req, res) => {
+  let { img } = req.body;
+
+  res.json(cargarImagenes(path.join(__dirname, "/python/login.json"),img));
+});
+
+router.post("/CargarImagenesRegistro", (req, res) => {
+  let { img } = req.body;
+  res.json(cargarImagenes(path.join(__dirname, "/python/registro.json"),img));
+});
+
+function cargarImagenes(dir, img) {
+  img = Object.values(img);
+  img = [...img, 1];
+  try {
+    fs.writeFileSync(dir, JSON.stringify(img));
+  } catch (error) {
+    return { message: "No se pudo cargar la imagen correctamente" };
+  }
+  return { message: "Imagen cargada correctamente" };
+}
 module.exports = router;

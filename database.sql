@@ -2,6 +2,14 @@ DROP DATABASE IF EXISTS Medico;
 CREATE DATABASE IF NOT EXISTS Medico;
 USE Medico;
 
+CREATE TABLE VectorCaracteristicas(
+    idVector INT AUTO_INCREMENT,
+    vector1 VARCHAR(1000) NOT NULL,
+    vector2 VARCHAR(1000 ) NOT NULL,
+    vector3 VARCHAR(1000 ) NOT NULL,
+    PRIMARY KEY(idVector)
+)ENGINE = InnoDB;
+
 CREATE TABLE Direccion(
     idDireccion INT AUTO_INCREMENT,
     calle VARCHAR(50) NOT NULL,
@@ -11,6 +19,8 @@ CREATE TABLE Direccion(
     municipio VARCHAR(50)  NOT NULL,
     estado VARCHAR(50)  NOT NULL,
     cp VARCHAR(50)  NOT NULL,
+    alt VARCHAR(50) NOT NULL,
+    lat   VARCHAR(50) NOT NULL,
     PRIMARY KEY (idDireccion)
 )ENGINE=InnoDB;
 
@@ -51,14 +61,19 @@ CREATE TABLE Usuario(
     idDp INT  NOT NULL,
     idContacto INT  NOT NULL,
     idRol INT  NOT NULL,
-    PRIMARY KEY(idUsuario)
+    idVector INT NOT NULL,
+    PRIMARY KEY(idUsuario),
+    FOREIGN KEY(idDp) REFERENCES DatosPersonales(idDP),
+    FOREIGN KEY(idContacto) REFERENCES Contacto(idContacto),
+    FOREIGN KEY(idRol) REFERENCES Roles(idRol),
+    FOREIGN KEY(idVector) REFERENCES VectorCaracteristicas(idVector)
 )ENGINE=InnoDB;
 
 CREATE TABLE EquipoMedico(
     idEquipoMedico INT AUTO_INCREMENT,
     nombre VARCHAR(50)  NOT NULL,
     estado VARCHAR(50)  NOT NULL,
-    costo  NUMERIC(10,2)  NOT NULL,
+    costo  VARCHAR(100)  NOT NULL,
     idVendedor  INT  NOT NULL,
     descripcion  VARCHAR(50),
     PRIMARY KEY(idEquipoMedico),
@@ -91,3 +106,17 @@ CREATE TABLE DonacionAsignada(
     FOREIGN KEY(idDonacion) REFERENCES ListaDonaciones(idDonacion),
     FOREIGN KEY(idSolicitante) REFERENCES Usuario(idUsuario)
 )ENGINE=InnoDB;
+
+CREATE TABLE Imagenes(
+    idImagen INT AUTO_INCREMENT,
+    ruta VARCHAR(255) NOT NULL,
+    PRIMARY KEY(idImagen)
+)ENGINE = InnoDB;
+
+CREATE TABLE EM_Imagen(
+    idEquipoMedico INT,
+    idImagen INT,
+    FOREIGN KEY(idImagen) REFERENCES Imagenes(idImagen),
+    FOREIGN KEY(idEquipoMedico) REFERENCES EquipoMedico(idEquipoMedico)
+)ENGINE=InnoDB;
+
