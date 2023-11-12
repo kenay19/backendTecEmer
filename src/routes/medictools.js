@@ -105,7 +105,48 @@ router.post("/getProducts", async (req, res) => {
   }
 });
 
+router.post('/getProduct',async (req,res) =>{
+  const { idProduct } = req.body;
+  try {
+    datos = [];
+    const result = await pool.query(
+      "SELECT idEquipoMedico,nombre,estado,costo,descripcion,idVendedor FROM EquipoMedico WHERE idEquipoMedico=? ",
+      [idProduct]
+    );
+    for (let i = 0; i < result.length; i++) {
+      const numImagenes = await pool.query(
+        "SELECT idImagen FROM EM_Imagenes WHERE idEquipoMedico=? ",
+        result[i].idEquipoMedico
+      );
+      imagenes = [];
+      for (let j = 0; j < numImagenes.length; j++) {
+        let ruta = await pool.query(
+          "SELECT ruta FROM Imagenes WHERE idImagen=?",
+          [numImagenes[j].idImagen]
+        );
+        imagenes.push(ruta);
+      }
+
+      datos.push([
+        {
+          idEquipoMedico: result[i].idEquipoMedico,
+          nombre: result[i].nombre,
+          estado: result[i].estado,
+          costo: result[i].costo,
+          descripcion: result[i].descripcion,
+          imagenes,
+        },
+      ]);
+    }
+    res.json(datos);
+  } catch (err) {
+    console.log(err);
+    res.json({ error: err.sqlMessage, query: err.sql });
+  }
+})
+
 router.post("/getImageProducts", (req, res) => {
+  console.log(req.body.ruta)
   console.log(path.join(__dirname, "..", req.body.ruta));
   res.sendFile(path.join(__dirname, "..", req.body.ruta), (err) => {
     if (err) {
@@ -114,5 +155,124 @@ router.post("/getImageProducts", (req, res) => {
     }
   });
 });
+
+router.put('/updateProduct',async(req,res) =>{
+  const {nombre,descripcion,costo,estado,idEquipoMedico} = req.body;
+  try{
+    const result = await pool.query('UPDATE EquipoMedico SET nombre = ?,descripcion = ?, costo = ?,estado = ? WHERE idEquipoMedico = ?',[nombre,descripcion,costo,estado,idEquipoMedico])
+    console.log(result)
+    res.json(result);
+  }catch(err){
+    res.json(err)
+  }
+})
+
+router.post('/deleteProduct',async(req,res) => {
+  const { idEquipoMedico} = req.body;
+  console.log(req.body)
+  try {
+    // primero obtenemos todas las rutas de las imagenes
+    const pathImage = await pool.query('SELECT * FROM Imagenes, EM_imagenes WHERE EM_imagenes.idEquipoMedico = ? AND EM_imagenes.idImagen = Imagenes.idImagen',[idEquipoMedico])
+    await pool.query('DELETE FROM EM_imagenes WHERE idEquipoMedico = ?',[idEquipoMedico])
+    // eliminamos las imagenes del servidor y la ruta se elmina de la base de datos
+    for(let i = 0 ; i < pathImage.length; i++) {
+      const serverPath = path.join(__dirname, "..", pathImage[i].ruta);
+      if(fs.existsSync(serverPath)) {
+        fs.unlink(serverPath, (err) => {
+          if(err) {
+            console.error('Error al eliminar el archivo:', err);
+          }else{
+            console.log('Archivo eliminado con éxito.');
+          }
+        })
+      }
+      await pool.query('DELETE FROM Imagenes WHERE ruta = ?',[pathImage[i].ruta])
+
+    }
+    const result = await pool.query('DELETE FROM equipoMedico WHERE idEquipoMedico = ?',[idEquipoMedico])
+    res.json(result);
+  } catch (error) {
+    res.json({error: error.message})
+  }
+})
+
+router.get('/getProductsDonador',async(req,res) => {
+  try {
+    datos = [];
+    const result = await pool.query(
+      "SELECT idEquipoMedico,nombre,estado,costo,descripcion,idVendedor FROM EquipoMedico WHERE  estado=? ",
+      ['En venta']
+    );
+    for (let i = 0; i < result.length; i++) {
+      const numImagenes = await pool.query(
+        "SELECT idImagen FROM EM_Imagenes WHERE idEquipoMedico=? ",
+        result[i].idEquipoMedico
+      );
+      imagenes = [];
+      for (let j = 0; j < numImagenes.length; j++) {
+        let ruta = await pool.query(
+          "SELECT ruta FROM Imagenes WHERE idImagen=?",
+          [numImagenes[j].idImagen]
+        );
+        imagenes.push(ruta);
+      }
+
+      datos.push([
+        {
+          idEquipoMedico: result[i].idEquipoMedico,
+          nombre: result[i].nombre,
+          estado: result[i].estado,
+          costo: result[i].costo,
+          descripcion: result[i].descripcion,
+          imagenes,
+        },
+      ]);
+    }
+    res.json(datos);
+  } catch (error) {
+    res.json({error})
+  }
+})
+
+router.post('/findProduct',async(req,res) =>{
+  const  producto  = req.body[0];
+  console.log(producto);
+  try {  
+    datos = [];
+    const result = await pool.query(
+      "SELECT idEquipoMedico,nombre,estado,costo,descripcion,idVendedor FROM EquipoMedico WHERE  nombre LIKE '%"+producto+"%'  OR descripcion LIKE '%"+producto+"%'"
+    );
+    for (let i = 0; i < result.length; i++) {
+      const numImagenes = await pool.query(
+        "SELECT idImagen FROM EM_Imagenes WHERE idEquipoMedico=? ",
+        result[i].idEquipoMedico
+      );
+      imagenes = [];
+      for (let j = 0; j < numImagenes.length; j++) {
+        let ruta = await pool.query(
+          "SELECT ruta FROM Imagenes WHERE idImagen=?",
+          [numImagenes[j].idImagen]
+        );
+        imagenes.push(ruta);
+      }
+
+      datos.push([
+        {
+          idEquipoMedico: result[i].idEquipoMedico,
+          nombre: result[i].nombre,
+          estado: result[i].estado,
+          costo: result[i].costo,
+          descripcion: result[i].descripcion,
+          imagenes,
+        },
+      ]);
+    }
+    console.log(datos)
+    res.json(datos)
+  } catch (error) {
+    console.error(error);
+    res.json({error})
+  }
+})
 
 module.exports = router;

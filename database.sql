@@ -113,7 +113,7 @@ CREATE TABLE Imagenes(
     PRIMARY KEY(idImagen)
 )ENGINE = InnoDB;
 
-CREATE TABLE EM_Imagen(
+CREATE TABLE EM_Imagenes(
     idEquipoMedico INT,
     idImagen INT,
     FOREIGN KEY(idImagen) REFERENCES Imagenes(idImagen),
