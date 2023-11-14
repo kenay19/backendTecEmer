@@ -94,6 +94,7 @@ router.post("/getProducts", async (req, res) => {
           estado: result[i].estado,
           costo: result[i].costo,
           descripcion: result[i].descripcion,
+          idVendedor: result[i].idVendedor,
           imagenes,
         },
       ]);
@@ -134,6 +135,7 @@ router.post('/getProduct',async (req,res) =>{
           estado: result[i].estado,
           costo: result[i].costo,
           descripcion: result[i].descripcion,
+          idVendedor: result[i].idVendedor,
           imagenes,
         },
       ]);
@@ -157,7 +159,10 @@ router.post("/getImageProducts", (req, res) => {
 });
 
 router.put('/updateProduct',async(req,res) =>{
+  console.log(req.body)
   const {nombre,descripcion,costo,estado,idEquipoMedico} = req.body;
+  
+  console.log(nombre,descripcion,costo,estado,idEquipoMedico)
   try{
     const result = await pool.query('UPDATE EquipoMedico SET nombre = ?,descripcion = ?, costo = ?,estado = ? WHERE idEquipoMedico = ?',[nombre,descripcion,costo,estado,idEquipoMedico])
     console.log(result)
@@ -240,7 +245,7 @@ router.post('/findProduct',async(req,res) =>{
   try {  
     datos = [];
     const result = await pool.query(
-      "SELECT idEquipoMedico,nombre,estado,costo,descripcion,idVendedor FROM EquipoMedico WHERE  nombre LIKE '%"+producto+"%'  OR descripcion LIKE '%"+producto+"%'"
+      "SELECT idEquipoMedico,nombre,estado,costo,descripcion,idVendedor FROM EquipoMedico WHERE  nombre LIKE '%"+producto+"%'  OR descripcion LIKE '%"+producto+"%' AND estado = 'En venta'"
     );
     for (let i = 0; i < result.length; i++) {
       const numImagenes = await pool.query(
@@ -272,6 +277,19 @@ router.post('/findProduct',async(req,res) =>{
   } catch (error) {
     console.error(error);
     res.json({error})
+  }
+})
+
+router.post('/getCoordenates', async(req,res)=>{
+  const { idVendedor} = req.body;
+  console.log(idVendedor)
+  try {
+    const result = await pool.query('SELECT alt,lat FROM Direccion,Direcciones,DatosPersonales,Usuario WHERE  Usuario.idUsuario = ? AND DatosPersonales.idDp = Usuario.idDp AND Direcciones.idDp = DatosPersonales.idDp AND Direccion.idDireccion=Direcciones.idDireccion',[idVendedor])
+    console.log(result)
+    res.json(result)
+  } catch (error) {
+    console.log(error)
+    res.json(error)
   }
 })
 
