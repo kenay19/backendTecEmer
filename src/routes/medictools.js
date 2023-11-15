@@ -70,7 +70,7 @@ router.post("/getProducts", async (req, res) => {
   try {
     datos = [];
     const result = await pool.query(
-      "SELECT idEquipoMedico,nombre,estado,costo,descripcion FROM EquipoMedico WHERE idVendedor=? ",
+      "SELECT idEquipoMedico,nombre,estado,costo,descripcion FROM EquipoMedico WHERE idVendedor=?  AND estado != 'En carrito' AND estado != 'Comprado'",
       [idVendedor]
     );
     for (let i = 0; i < result.length; i++) {
@@ -245,7 +245,7 @@ router.post('/findProduct',async(req,res) =>{
   try {  
     datos = [];
     const result = await pool.query(
-      "SELECT idEquipoMedico,nombre,estado,costo,descripcion,idVendedor FROM EquipoMedico WHERE  nombre LIKE '%"+producto+"%'  OR descripcion LIKE '%"+producto+"%' AND estado = 'En venta'"
+      "SELECT idEquipoMedico,nombre,estado,costo,descripcion,idVendedor FROM EquipoMedico WHERE  (nombre LIKE '%"+producto+"%'  OR descripcion LIKE '%"+producto+"%') AND estado = 'En venta'"
     );
     for (let i = 0; i < result.length; i++) {
       const numImagenes = await pool.query(
@@ -289,6 +289,19 @@ router.post('/getCoordenates', async(req,res)=>{
     res.json(result)
   } catch (error) {
     console.log(error)
+    res.json(error)
+  }
+})
+
+router.post('/compraVenta',async(req,res)=>{
+  const {idEquipoMedico,idUsuario} = req.body;
+  console.log(idEquipoMedico,idUsuario)
+  try {
+    const result = await pool.query('INSERT INTO compraVenta(idEquipoMedico,idComprador)VALUES (?, ?)',[idEquipoMedico,idUsuario]);
+    const result2 = await pool.query('INSERT INTO ListaDonaciones(idEquipoMedico,idCompra)VALUES(?,?)',[idEquipoMedico,result.insertId])
+    res.json(result2)
+  } catch (error) {
+    console.error(error)
     res.json(error)
   }
 })

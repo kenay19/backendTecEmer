@@ -120,3 +120,12 @@ CREATE TABLE EM_Imagenes(
     FOREIGN KEY(idEquipoMedico) REFERENCES EquipoMedico(idEquipoMedico)
 )ENGINE=InnoDB;
 
+CREATE TABLE ListaEspera(
+    idLista INT AUTO_INCREMENT,
+    idEquipoMedico INT ,
+    idSolicitante INT,
+    fechaPedido DATETIME,
+    PRIMARY KEY(idLista),
+    FOREIGN KEY(idEquipoMedico) REFERENCES EquipoMedico(idEquipoMedico),
+    FOREIGN KEY(idSolicitante ) REFERENCES Usuario(idUsuario)
+)
