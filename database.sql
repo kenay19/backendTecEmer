@@ -122,10 +122,9 @@ CREATE TABLE EM_Imagenes(
 
 CREATE TABLE ListaEspera(
     idLista INT AUTO_INCREMENT,
-    idEquipoMedico INT ,
+    descripNombre VARCHAR(255) ,
     idSolicitante INT,
     fechaPedido DATETIME,
     PRIMARY KEY(idLista),
-    FOREIGN KEY(idEquipoMedico) REFERENCES EquipoMedico(idEquipoMedico),
     FOREIGN KEY(idSolicitante ) REFERENCES Usuario(idUsuario)
 )

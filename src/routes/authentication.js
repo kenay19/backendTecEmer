@@ -79,7 +79,6 @@ function calcularSimilitudCoseno(vector1, vector2) {
 
   // Establecer un umbral para determinar la similitud
   const umbral = 0.95; // Ajusta este valor según tus necesidades
-  console.log(similitudCoseno)
   // Retornar true si la similitud supera el umbral, de lo contrario, false
   return similitudCoseno >= umbral;
 }
@@ -180,11 +179,16 @@ router.post('/LoginFacial',(req, res) => {
       vector3 = calcularSimilitudCoseno(vectores[i].vector3,result.slice(-66))
       if((vector1 && vector2) || (vector2 && vector3) || (vector1 && vector3)){
         const resultado = await pool.query('SELECT idUsuario,idRol,nombre FROM Usuario,DatosPersonales WHERE Usuario.idVector=? AND Usuario.idDp=DatosPersonales.idDp',[vectores[i].idVector]);
+        console.log(vectores[i].idVector)
+        console.log(resultado)
         res.json(resultado)
+        return
       }
     }
+    res.json({error: 'no se coincide'})
     return
   });
+  
 })
 
 router.post("/CargarImagenesLogin", (req, res) => {

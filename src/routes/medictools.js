@@ -306,4 +306,117 @@ router.post('/compraVenta',async(req,res)=>{
   }
 })
 
+
+router.get('/getProductsSolicitante',async(req,res) => {
+  try {
+    datos = [];
+    const result = await pool.query(
+      "SELECT idEquipoMedico,nombre,estado,costo,descripcion,idVendedor FROM EquipoMedico WHERE  estado='Comprado' "
+     
+    );
+    for (let i = 0; i < result.length; i++) {
+      const numImagenes = await pool.query(
+        "SELECT idImagen FROM EM_Imagenes WHERE idEquipoMedico=? ",
+        result[i].idEquipoMedico
+      );
+      imagenes = [];
+      for (let j = 0; j < numImagenes.length; j++) {
+        let ruta = await pool.query(
+          "SELECT ruta FROM Imagenes WHERE idImagen=?",
+          [numImagenes[j].idImagen]
+        );
+        imagenes.push(ruta);
+      }
+
+      datos.push([
+        {
+          idEquipoMedico: result[i].idEquipoMedico,
+          nombre: result[i].nombre,
+          estado: result[i].estado,
+          costo: result[i].costo,
+          descripcion: result[i].descripcion,
+          idVendedor: result[i].idVendedor,
+          imagenes,
+        },
+      ]);
+    }
+    res.json(datos);
+  } catch (error) {
+    res.json({error})
+  }
+})
+
+router.post('/DonacionAsignada', async (req,res) => {
+  const { idEquipoMedico,idSolicitante} = req.body
+  try {
+    const result = await pool.query('SELECT idDonacion FROM ListaDonaciones WHERE idEquipoMedico = ?',[idEquipoMedico]);
+    res.json(await pool.query('INSERT INTO DonacionAsignada(idDonacion,idSolicitante)VALUES (?, ?)',[result[0].idDonacion,idSolicitante]))
+  } catch (error) {
+    console.error(error)
+    res.json(error)
+  }
+})
+
+router.post('/getDonacionesAsignadas', async(req,res) => {
+  const { idSolicitante}  = req.body;
+  try {
+    const idDonaciones  = await pool.query('SELECT idDonacion FROM DonacionAsignada WHERE idSolicitante=?',[idSolicitante]);
+    let idEquipoMedicos = []
+    for(let i = 0 ; i < idDonaciones.length; i++) {
+      let idEquipoMedico = await pool.query('SELECT idEquipoMedico FROM ListaDonaciones WHERE idDonacion=?',[idDonaciones[i].idDonacion])
+      idEquipoMedicos.push(idEquipoMedico[0].idEquipoMedico)
+    }
+    console.log(idEquipoMedicos)
+    res.json([{idEquipoMedicos}])
+
+  } catch (error) {
+    console.error(error);
+    res.json(error)
+  }
+})
+
+
+router.post('/getProductsIds',async(req,res)=>{
+  let { idVendedor } = req.body;
+  idVendedor = idVendedor[0].idEquipoMedicos
+  try {
+    datos = [];
+    for(let i = 0 ; i < idVendedor.length; i++){
+      let result = await pool.query(
+        "SELECT idEquipoMedico,nombre,estado,costo,descripcion,idVendedor FROM EquipoMedico WHERE idEquipoMedico = ?",
+        [idVendedor[i]]
+      );
+      for (let i = 0; i < result.length; i++) {
+        let numImagenes = await pool.query(
+          "SELECT idImagen FROM EM_Imagenes WHERE idEquipoMedico=? ",
+          result[i].idEquipoMedico
+        );
+        imagenes = [];
+        for (let j = 0; j < numImagenes.length; j++) {
+          let ruta = await pool.query(
+            "SELECT ruta FROM Imagenes WHERE idImagen=?",
+            [numImagenes[j].idImagen]
+          );
+          imagenes.push(ruta);
+        }
+  
+        datos.push([
+          {
+            idEquipoMedico: result[i].idEquipoMedico,
+            nombre: result[i].nombre,
+            estado: result[i].estado,
+            costo: result[i].costo,
+            descripcion: result[i].descripcion,
+            idVendedor: result[i].idVendedor,
+            imagenes,
+          },
+        ]);
+      }
+    }
+    res.json(datos);
+  } catch (err) {
+    console.log(err);
+    res.json({ error: err.sqlMessage, query: err.sql });
+  }
+}),
 module.exports = router;
