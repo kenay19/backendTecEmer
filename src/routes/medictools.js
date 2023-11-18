@@ -4,6 +4,8 @@ const pool = require("../database");
 const sharp = require("sharp");
 const fs = require("fs");
 const path = require("path");
+const multer = require('multer')()
+const {SpeechClient} = require('@google-cloud/speech')
 router.post("/register", async (req, res) => {
   const { nombre, costo, idVendedor, descripcion, imagenes } = req.body;
   let urls = [];
@@ -419,4 +421,59 @@ router.post('/getProductsIds',async(req,res)=>{
     res.json({ error: err.sqlMessage, query: err.sql });
   }
 }),
+
+
+router.post('/transcribe', multer.single('audioBlob'), async (req, res) => {
+  const audioBlob = req.file;
+console.log(audioBlob)
+  try {
+    const client = new SpeechClient({
+      keyFilename: path.join(__dirname, './coordenadasgeograficas-510f044c6700.json')
+    });
+
+    if (audioBlob && audioBlob.buffer) {
+      audioContent = audioBlob.buffer;
+    } else {
+      // Manejar el caso cuando audioBlob.path no está definido
+      throw new Error('El archivo de audio no está disponible');
+    }
+
+    const config = {
+      encoding: 'WAV',
+      languageCode: 'es-MX',
+      sampleRateHertz: 48000,
+    };
+    var transcrip = ''
+    const CHUNK_SIZE = 10000; // Tamaño del fragmento, puedes ajustarlo según tu necesidad
+    const totalChunks = Math.ceil(audioContent.length / CHUNK_SIZE);
+  // for(let i = 0 ; i < totalChunks;i++){
+      
+
+      const request = {
+        audio: {content:   audioContent } ,//divideChunk(audioContent,i,CHUNK_SIZE)},
+        config: config,
+      };
+    
+      const [response] = await client.recognize(request);
+      const transcription = response.results
+        .map((result) => result.alternatives[0].transcript)
+        .join('\n');
+    
+        transcrip += transcription
+   // }
+
+    
+    console.log(transcription);
+    res.status(200).json({ transcription });
+  } catch (error) {
+    console.error('Error al transcribir:', error);
+    res.status(500).json({ error: 'Error al transcribir el audio' });
+  }
+});
+
+function divideChunk(audio,chunkIndex,chunksize){
+  const start = chunkIndex * chunksize;
+  const end = start + chunksize;
+  return audio.substring(start, end);
+}
 module.exports = router;

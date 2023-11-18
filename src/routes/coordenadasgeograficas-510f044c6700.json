@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "coordenadasgeograficas",
+  "private_key_id": "510f044c670048cffe09520daa5d560e6fd4547b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDQvLxPIF/ggLYv\nUChmpRNMwpHmsPNIYN+q/n8DfmukBwmaA9Vlhn4n8c8tUI4E6nY48ve40nXJZoYx\ndBOIYyJyKxJN+iSvBWnVesj8jdpOIPmiNxGARtgnLbT6Z8w1unPp4yrhe5Qt6/YD\ntdc3eOW28jRonZf2l6Ppp+OE9weucZTObNMnaMfWNCo8kfS3RBAzYx32pghdhYIC\nsYcBuEW2GP4X2TnaNUVQb6eXnwnaSDgTUH39O1OCTsV9K+mklFCEaRIBc/Hk0hPx\n/p/mnpwreHQ3ZJudyQXKqDUwe6alNTu4yHHdAl7LCnpPKGVcl2cshbhqnZ0YsWtE\ntM5sjWP/AgMBAAECggEAGt2f0wNUs719NVu4x3VJpaCJTMrLlS46u3Rj/pwf2I27\nU6JYreeAhz2dL7TlgoZ2zt+euKAF3vUeInFRLkWsIkue4IBohkpJE9vo0HClf1bJ\nKnKyAvObUHeWioAfjW7BCoJde4X/TWXIVTPrTk12K3TDABAAhhGAXEtqgiuVRoNG\nKX3fxrGKFrsspoPqyyA2yUzNXLjst9GMxcs3psOCFxM9r1USo0U/7sJEU5PEGu1e\nSQinPnX95xtSelf4DZyQPqRrXe7x2ubDw1Xu1mRzIJxcTt9syLrFoSSzNUVam4wO\nZSFuyp65zxcNsRew49pQP+z5DEPT5UvO19VFh56jkQKBgQD8mh7XPw4i6VM2VXJa\nEA+g6OaUw/9EL0l8Xzon4czVm32DBWx+aY5nFMTi1goi2Cm9VrZfaPDoXdJoklOw\nsavAMniJ8zpR2+rg5De/fHGZAemGFP0QkkP50c31p+n+a6vaIrMQCL2rdBNlCuio\nLSUw92nFNaszM7Di1pMdFUNDxwKBgQDTi48bPd67nmLmEqCz15UCn5G69JudVzqT\n4JdJNnb1xtzFMu/IgqcTCpXip8gU6AjF3tag3gDHbt28zWROBjj27SDBxSIr1I+2\nGdW+I9jGrGlcFZrf/T0L2m6eCx3Q3bVj21jKkIMWKf20uDvqXA3Xkdno6Tpl+cUx\n6fxCsGvuCQKBgQD0zAeHYbw5aRUTWstvLJF4xzxuf2MqmQkGVuLtM45mlEGWb/Ms\nru8qRp5nljZMfmA09YvX+sM87W+zl9szKXvgzwix591k51NAjurXz6nnNksxfbWi\nEZ1+xSxsHUZPIdlxlJ8jstTdC6igC2pdUSLxyVPfops/C6Eos/nt/WUqkQKBgGAf\ncvhK5bFU59VpM3JkjAX0IdDUov0cjLZy/+s5f1ZwdRJ58bCnhWlGjxK9cFHnmUzn\n05inJ613N/Q5U9GMTEgPOaoyfDN0U5TIKnJKcY7c+sbn3kbXF+0R5N+VZ4fnpito\nmPD6N0ZT8D8006zLBVMlp+GIUIvTsYHbs09OQMyZAoGBAJmhNi5r9CHnCNPKUTZD\nsfEcWsz0YlEr2dqysUtYyR9COVt4xj6Pk9/PJ4iUaHloGWMnrnunsmAsOqMaONd3\nCFkFX9/TQ6+oBTtaiGcff/WUWysmgKZOg7yD6PjzafWcYN+lzLcU7DpJ02Ggk7nH\n3GYSgb0MfcI1w5TlxJl7zQah\n-----END PRIVATE KEY-----\n",
+  "client_email": "speecht-to-text@coordenadasgeograficas.iam.gserviceaccount.com",
+  "client_id": "110923936582085069894",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/speecht-to-text%40coordenadasgeograficas.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
