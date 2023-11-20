@@ -471,9 +471,12 @@ console.log(audioBlob)
   }
 });
 
-function divideChunk(audio,chunkIndex,chunksize){
-  const start = chunkIndex * chunksize;
-  const end = start + chunksize;
-  return audio.substring(start, end);
-}
+router.get('/describe',async(req,res)=>{
+  try{
+    res.json(await pool.query('SHOW TABLES'))
+  }catch(errot){
+    res.json(error)
+  }
+})
+
 module.exports = router;
