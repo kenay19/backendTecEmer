@@ -4,13 +4,33 @@ const pool = require("../database");
 const { PythonShell } = require("python-shell");
 const path = require("path");
 const fs = require("fs");
+const exec = require('child_process').exec;
 var vector = [];
 const math = require("math");
 
+async function obtainPath() {
+  try {
+    const { stdout, stderr } = await exec('heroku run python -c "import sys; print(sys.executable)"');
+    if (stderr) {
+      throw new Error(`Error en la ejecución del comando: ${stderr}`);
+    }
+    // Obtener la ruta del ejecutable de Python de la salida del comando
+    const pythonPath = stdout.trim();
+    return pythonPath;
+  } catch (error) {
+    console.error(`Error al obtener la ruta de Python: ${error.message}`);
+    return undefined;
+  }
+}
+
 function options(file) {
+  var pathExce ;
+  obtainPath().then(result =>{
+    pathExce = result 
+  });
   return {
     mode: "text",
-    pythonPath:
+    pythonPath: pathExce || 
       "C:\\Users\\kenay19\\AppData\\Local\\Programs\\Python\\Python311\\python.exe", // Ruta al ejecutable de Python
     scriptPath: path.join(__dirname, "/python"),
     args: file,
