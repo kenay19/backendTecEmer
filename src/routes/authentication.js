@@ -27,6 +27,7 @@ async function obtainPath() {
 
 function options(file) {
   var pathExce ;
+  console.log('============================================================================')
   obtainPath().then(result =>{
     console.log(result)
     pathExce = result 
