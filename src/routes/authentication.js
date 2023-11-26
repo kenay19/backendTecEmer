@@ -20,10 +20,7 @@ function options(file) {
 function generateCaracterisitcas(file) {
   return new Promise((resolve, reject) => {
     // Ruta al directorio que contiene requirements.txt
-    const rutaRequerimientos = path.join(
-      __dirname,
-      "ruta/de/tu/requirements.txt"
-    );
+    const rutaRequerimientos = path.join(__dirname, "/python/requirements.txt");
 
     // Comando para instalar dependencias desde requirements.txt
     const comandoInstalacion = `pip install -r ${rutaRequerimientos}`;
@@ -33,7 +30,7 @@ function generateCaracterisitcas(file) {
       mode: "text",
       pythonPath: process.env.PYTHON_RUNNER, // O 'python3' si es necesario
       pythonOptions: ["-m"], // Ejecutar como módulo
-      scriptPath: "", // No necesitas un script, solo el comando de instalación
+      scriptPath: path.join(__dirname, "/python/inst.py"), // No necesitas un script, solo el comando de instalación
       args: ["-c", comandoInstalacion], // Argumentos: ejecutar el comando de instalación
     };
 
