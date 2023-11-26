@@ -11,11 +11,13 @@ const math = require("math");
 async function obtainPath() {
   try {
     const { stdout, stderr } = await exec('heroku run python -c "import sys; print(sys.executable)"');
+    console.log(stdout);
     if (stderr) {
       throw new Error(`Error en la ejecución del comando: ${stderr}`);
     }
     // Obtener la ruta del ejecutable de Python de la salida del comando
     const pythonPath = stdout.trim();
+    console.log(pythonPath);
     return pythonPath;
   } catch (error) {
     console.error(`Error al obtener la ruta de Python: ${error.message}`);
