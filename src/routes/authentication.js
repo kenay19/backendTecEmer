@@ -30,12 +30,12 @@ function generateCaracterisitcas(file) {
       mode: "text",
       pythonPath: process.env.PYTHON_RUNNER, // O 'python3' si es necesario
       pythonOptions: ["-m"], // Ejecutar como módulo
-      scriptPath: path.join(__dirname, "/python/inst.py"), // No necesitas un script, solo el comando de instalación
+      scriptPath: path.join(__dirname, "/python"), // No necesitas un script, solo el comando de instalación
       args: ["-c", comandoInstalacion], // Argumentos: ejecutar el comando de instalación
     };
 
     // Ejecutar el comando para instalar requerimientos
-    PythonShell.run("", options, (err, result) => {
+    PythonShell.run("inst.py", options, (err, result) => {
       if (err) {
         console.error("Error al instalar requerimientos:", err);
         // Manejar el error apropiadamente
