@@ -1,0 +1,6 @@
+json
+numpy
+opencv-python
+dlib
+IPython
+matplotlib
