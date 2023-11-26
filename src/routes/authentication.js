@@ -26,16 +26,10 @@ async function obtainPath() {
 }
 
 function options(file) {
-  var pathExce ;
-  console.log('============================================================================')
-  obtainPath().then(result =>{
-    console.log(result)
-    pathExce = result 
-  });
+  
   return {
     mode: "text",
-    pythonPath: pathExce || 
-      "C:\\Users\\kenay19\\AppData\\Local\\Programs\\Python\\Python311\\python.exe", // Ruta al ejecutable de Python
+    pythonPath: process.env.PYTHON_RUNNER, // Ruta al ejecutable de Python
     scriptPath: path.join(__dirname, "/python"),
     args: file,
   };
