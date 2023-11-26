@@ -19,31 +19,6 @@ function options(file) {
 
 function generateCaracterisitcas(file) {
   return new Promise((resolve, reject) => {
-    // Ruta al directorio que contiene requirements.txt
-    const rutaRequerimientos = path.join(__dirname, "/python/requirements.txt");
-
-    // Comando para instalar dependencias desde requirements.txt
-    const comandoInstalacion = `pip install -r ${rutaRequerimientos}`;
-
-    // Configuración para ejecutar el comando de instalación de requerimientos
-    let optio = {
-      mode: "text",
-      pythonPath: process.env.PYTHON_RUNNER, // O 'python3' si es necesario
-      pythonOptions: ["-m"], // Ejecutar como módulo
-      scriptPath: path.join(__dirname, "/python"), // No necesitas un script, solo el comando de instalación
-      args: ["-c", comandoInstalacion], // Argumentos: ejecutar el comando de instalación
-    };
-
-    // Ejecutar el comando para instalar requerimientos
-    PythonShell.run("inst", optio, (err, result) => {
-      if (err) {
-        console.error("Error al instalar requerimientos:", err);
-        // Manejar el error apropiadamente
-      } else {
-        console.log("Requerimientos instalados correctamente:", result);
-        // Continuar con tu lógica una vez que se hayan instalado los requerimientos
-      }
-    });
     const pyshell = new PythonShell("reconocimiento.py", options(file));
     let messages = []; // Aquí almacenaremos los mensaje
     pyshell.on("message", (message) => {
