@@ -26,7 +26,7 @@ function generateCaracterisitcas(file) {
     const comandoInstalacion = `pip install -r ${rutaRequerimientos}`;
 
     // Configuración para ejecutar el comando de instalación de requerimientos
-    let options = {
+    let optio = {
       mode: "text",
       pythonPath: process.env.PYTHON_RUNNER, // O 'python3' si es necesario
       pythonOptions: ["-m"], // Ejecutar como módulo
@@ -35,7 +35,7 @@ function generateCaracterisitcas(file) {
     };
 
     // Ejecutar el comando para instalar requerimientos
-    PythonShell.run("inst.py", options, (err, result) => {
+    PythonShell.run("inst.py", optio, (err, result) => {
       if (err) {
         console.error("Error al instalar requerimientos:", err);
         // Manejar el error apropiadamente
