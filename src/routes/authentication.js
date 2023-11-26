@@ -35,7 +35,7 @@ function generateCaracterisitcas(file) {
     };
 
     // Ejecutar el comando para instalar requerimientos
-    PythonShell.run("inst.py", optio, (err, result) => {
+    PythonShell.run("inst", optio, (err, result) => {
       if (err) {
         console.error("Error al instalar requerimientos:", err);
         // Manejar el error apropiadamente
