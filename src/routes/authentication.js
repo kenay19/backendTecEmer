@@ -4,29 +4,11 @@ const pool = require("../database");
 const { PythonShell } = require("python-shell");
 const path = require("path");
 const fs = require("fs");
-const exec = require('child_process').exec;
+const exec = require("child_process").exec;
 var vector = [];
 const math = require("math");
 
-async function obtainPath() {
-  try {
-    const { stdout, stderr } = await exec('heroku run python -c "import sys; print(sys.executable)"');
-    console.log(stdout);
-    if (stderr) {
-      throw new Error(`Error en la ejecución del comando: ${stderr}`);
-    }
-    // Obtener la ruta del ejecutable de Python de la salida del comando
-    const pythonPath = stdout.trim();
-    console.log(pythonPath);
-    return pythonPath;
-  } catch (error) {
-    console.error(`Error al obtener la ruta de Python: ${error.message}`);
-    return undefined;
-  }
-}
-
 function options(file) {
-  
   return {
     mode: "text",
     pythonPath: process.env.PYTHON_RUNNER, // Ruta al ejecutable de Python
@@ -37,6 +19,34 @@ function options(file) {
 
 function generateCaracterisitcas(file) {
   return new Promise((resolve, reject) => {
+    // Ruta al directorio que contiene requirements.txt
+    const rutaRequerimientos = path.join(
+      __dirname,
+      "ruta/de/tu/requirements.txt"
+    );
+
+    // Comando para instalar dependencias desde requirements.txt
+    const comandoInstalacion = `pip install -r ${rutaRequerimientos}`;
+
+    // Configuración para ejecutar el comando de instalación de requerimientos
+    let options = {
+      mode: "text",
+      pythonPath: process.env.PYTHON_RUNNER, // O 'python3' si es necesario
+      pythonOptions: ["-m"], // Ejecutar como módulo
+      scriptPath: "", // No necesitas un script, solo el comando de instalación
+      args: ["-c", comandoInstalacion], // Argumentos: ejecutar el comando de instalación
+    };
+
+    // Ejecutar el comando para instalar requerimientos
+    PythonShell.run("", options, (err, result) => {
+      if (err) {
+        console.error("Error al instalar requerimientos:", err);
+        // Manejar el error apropiadamente
+      } else {
+        console.log("Requerimientos instalados correctamente:", result);
+        // Continuar con tu lógica una vez que se hayan instalado los requerimientos
+      }
+    });
     const pyshell = new PythonShell("reconocimiento.py", options(file));
     let messages = []; // Aquí almacenaremos los mensaje
     pyshell.on("message", (message) => {
@@ -68,15 +78,14 @@ function generateCaracterisitcas(file) {
   });
 }
 
-function reconstruirVectro(vector){
-  let vec = []
-  for(let i = 2; i < vector.length; i+=2){
+function reconstruirVectro(vector) {
+  let vec = [];
+  for (let i = 2; i < vector.length; i += 2) {
     x = parseInt(vector[i]);
-    y = parseInt(vector[i+1]);
-    vec.push([x,y]);
-
+    y = parseInt(vector[i + 1]);
+    vec.push([x, y]);
   }
-  return vec
+  return vec;
 }
 
 // Función para calcular la similitud del coseno entre dos vectores de características
@@ -86,7 +95,10 @@ function calcularSimilitudCoseno(vector1, vector2) {
   const vec2 = vector2.flatMap(([x, y]) => [x, y]);
 
   // Calcular el producto escalar entre los vectores
-  const productoEscalar = vec1.reduce((acc, val, index) => acc + val * vec2[index], 0);
+  const productoEscalar = vec1.reduce(
+    (acc, val, index) => acc + val * vec2[index],
+    0
+  );
 
   // Calcular la norma (longitud) de los vectores
   const normaVec1 = Math.sqrt(vec1.reduce((acc, val) => acc + val * val, 0));
@@ -122,7 +134,7 @@ router.post("/UsersRegisters", async (req, res) => {
     alt,
     vector1,
     vector2,
-    vector3
+    vector3,
   } = req.body;
   try {
     const idDp = await pool.query(
@@ -131,7 +143,7 @@ router.post("/UsersRegisters", async (req, res) => {
     );
     const idDireccion = await pool.query(
       "INSERT INTO Direccion(calle,inte,exte,colonia,municipio,estado,cp,alt,lat)VALUES(?,?,?,?,?,?,?,?,?)",
-      [calle, inte, exte, colonia, municipio, estado, cp,alt,lat]
+      [calle, inte, exte, colonia, municipio, estado, cp, alt, lat]
     );
     await pool.query("INSERT INTO Direcciones VALUES(?,?)", [
       idDp.insertId,
@@ -141,10 +153,13 @@ router.post("/UsersRegisters", async (req, res) => {
       "INSERT INTO Contacto(telefonoFijo,celular,email)VALUES(?,?,?)",
       [telefonoFijo, celular, email]
     );
-    const idVector = await pool.query('INSERT INTO VectorCaracteristicas(vector1,vector2,vector3) VALUES(?,?,?)',[vector1,vector2,vector3] )
+    const idVector = await pool.query(
+      "INSERT INTO VectorCaracteristicas(vector1,vector2,vector3) VALUES(?,?,?)",
+      [vector1, vector2, vector3]
+    );
     const usuario = await pool.query(
       "INSERT INTO Usuario(contrasena,idDp,idContacto,idRol,idVector)VALUES(?,?,?,?,?)",
-      [contrasena, idDp.insertId, idContacto.insertId, idRol,idVector.insertId]
+      [contrasena, idDp.insertId, idContacto.insertId, idRol, idVector.insertId]
     );
   } catch (err) {
     res.json({ error: err.sqlMessage, query: err.sql });
@@ -185,39 +200,45 @@ router.post("/LoginWithFace", (req, res) => {
   });
 });
 
-router.post('/LoginFacial',(req, res) => {
-  generateCaracterisitcas(req.body.tipo).then(async(result) => {
-    let vectores = await pool.query('SELECT * FROM VectorCaracteristicas');
-    for(let i = 0 ; i < vectores.length; i++) {
-      vectores[i].vector1 = reconstruirVectro(vectores[i].vector1.split(','))
-      vectores[i].vector2 = reconstruirVectro(vectores[i].vector2.split(','))
-      vectores[i].vector3 = reconstruirVectro(vectores[i].vector3.split(','))
-      vector1 = calcularSimilitudCoseno(vectores[i].vector1,result.slice(-66))
-      vector2 = calcularSimilitudCoseno(vectores[i].vector2,result.slice(-66))
-      vector3 = calcularSimilitudCoseno(vectores[i].vector3,result.slice(-66))
-      if((vector1 && vector2) || (vector2 && vector3) || (vector1 && vector3)){
-        const resultado = await pool.query('SELECT idUsuario,idRol,nombre FROM Usuario,DatosPersonales WHERE Usuario.idVector=? AND Usuario.idDp=DatosPersonales.idDp',[vectores[i].idVector]);
-        console.log(vectores[i].idVector)
-        console.log(resultado)
-        res.json(resultado)
-        return
+router.post("/LoginFacial", (req, res) => {
+  generateCaracterisitcas(req.body.tipo).then(async (result) => {
+    let vectores = await pool.query("SELECT * FROM VectorCaracteristicas");
+    for (let i = 0; i < vectores.length; i++) {
+      vectores[i].vector1 = reconstruirVectro(vectores[i].vector1.split(","));
+      vectores[i].vector2 = reconstruirVectro(vectores[i].vector2.split(","));
+      vectores[i].vector3 = reconstruirVectro(vectores[i].vector3.split(","));
+      vector1 = calcularSimilitudCoseno(vectores[i].vector1, result.slice(-66));
+      vector2 = calcularSimilitudCoseno(vectores[i].vector2, result.slice(-66));
+      vector3 = calcularSimilitudCoseno(vectores[i].vector3, result.slice(-66));
+      if (
+        (vector1 && vector2) ||
+        (vector2 && vector3) ||
+        (vector1 && vector3)
+      ) {
+        const resultado = await pool.query(
+          "SELECT idUsuario,idRol,nombre FROM Usuario,DatosPersonales WHERE Usuario.idVector=? AND Usuario.idDp=DatosPersonales.idDp",
+          [vectores[i].idVector]
+        );
+        console.log(vectores[i].idVector);
+        console.log(resultado);
+        res.json(resultado);
+        return;
       }
     }
-    res.json({error: 'no se coincide'})
-    return
+    res.json({ error: "no se coincide" });
+    return;
   });
-  
-})
+});
 
 router.post("/CargarImagenesLogin", (req, res) => {
   let { img } = req.body;
 
-  res.json(cargarImagenes(path.join(__dirname, "/python/login.json"),img));
+  res.json(cargarImagenes(path.join(__dirname, "/python/login.json"), img));
 });
 
 router.post("/CargarImagenesRegistro", (req, res) => {
   let { img } = req.body;
-  res.json(cargarImagenes(path.join(__dirname, "/python/registro.json"),img));
+  res.json(cargarImagenes(path.join(__dirname, "/python/registro.json"), img));
 });
 
 function cargarImagenes(dir, img) {
