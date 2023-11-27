@@ -179,8 +179,8 @@ router.post('/deleteProduct',async(req,res) => {
   console.log(req.body)
   try {
     // primero obtenemos todas las rutas de las imagenes
-    const pathImage = await pool.query('SELECT * FROM Imagenes, EM_Imagenes WHERE EM_imagenes.idEquipoMedico = ? AND EM_imagenes.idImagen = Imagenes.idImagen',[idEquipoMedico])
-    await pool.query('DELETE FROM EM_imagenes WHERE idEquipoMedico = ?',[idEquipoMedico])
+    const pathImage = await pool.query('SELECT * FROM Imagenes, EM_Imagenes WHERE EM_Imagenes.idEquipoMedico = ? AND EM_Imagenes.idImagen = Imagenes.idImagen',[idEquipoMedico])
+    await pool.query('DELETE FROM EM_Imagenes WHERE idEquipoMedico = ?',[idEquipoMedico])
     // eliminamos las imagenes del servidor y la ruta se elmina de la base de datos
     for(let i = 0 ; i < pathImage.length; i++) {
       const serverPath = path.join(__dirname, "..", pathImage[i].ruta);
