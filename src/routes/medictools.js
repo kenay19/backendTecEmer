@@ -12,7 +12,7 @@ router.post("/register", async (req, res) => {
 
   try {
     const result = await pool.query(
-      "INSERT INTO EQUIPOMEDICO(nombre,estado,costo,idVendedor,descripcion)VALUES(?,?,?,?,?)",
+      "INSERT INTO EquipoMedico(nombre,estado,costo,idVendedor,descripcion)VALUES(?,?,?,?,?)",
       [nombre, "En venta", costo, idVendedor, descripcion]
     );
     for (let i = 0; i < imagenes.length; i++) {
