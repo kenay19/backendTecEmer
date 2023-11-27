@@ -299,7 +299,7 @@ router.post('/compraVenta',async(req,res)=>{
   const {idEquipoMedico,idUsuario} = req.body;
   console.log(idEquipoMedico,idUsuario)
   try {
-    const result = await pool.query('INSERT INTO compraVenta(idEquipoMedico,idComprador)VALUES (?, ?)',[idEquipoMedico,idUsuario]);
+    const result = await pool.query('INSERT INTO CompraVenta(idEquipoMedico,idComprador)VALUES (?, ?)',[idEquipoMedico,idUsuario]);
     const result2 = await pool.query('INSERT INTO ListaDonaciones(idEquipoMedico,idCompra)VALUES(?,?)',[idEquipoMedico,result.insertId])
     res.json(result2)
   } catch (error) {
