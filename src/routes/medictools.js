@@ -196,7 +196,7 @@ router.post('/deleteProduct',async(req,res) => {
       await pool.query('DELETE FROM Imagenes WHERE ruta = ?',[pathImage[i].ruta])
 
     }
-    const result = await pool.query('DELETE FROM equipoMedico WHERE idEquipoMedico = ?',[idEquipoMedico])
+    const result = await pool.query('DELETE FROM EquipoMedico WHERE idEquipoMedico = ?',[idEquipoMedico])
     res.json(result);
   } catch (error) {
     res.json({error: error.message, sql: error.sql});
