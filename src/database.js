@@ -2,6 +2,7 @@ const { promisify } = require("util");
 const mysql = require("mysql");
 
 const { database } = require("./keys");
+console.log(database)
 
 const pool = mysql.createPool(database);
 

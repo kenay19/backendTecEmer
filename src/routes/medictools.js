@@ -48,7 +48,7 @@ router.post("/register", async (req, res) => {
     console.log(urls.length);
     for (let i = 0; i < urls.length; i++) {
       let resultado = await pool.query(
-        "INSERT INTO imagenes(ruta)VALUES(?)",
+        "INSERT INTO Imagenes(ruta)VALUES(?)",
         urls[i]
       );
       await pool.query(
