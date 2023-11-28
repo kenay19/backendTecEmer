@@ -45,6 +45,7 @@ function generateCaracterisitcas(file) {
       if (err) {
         console.error("Error al cargar el modelo:", err);
       } else {
+
       }
     });
   });
@@ -80,7 +81,8 @@ function calcularSimilitudCoseno(vector1, vector2) {
   const similitudCoseno = productoEscalar / (normaVec1 * normaVec2);
 
   // Establecer un umbral para determinar la similitud
-  const umbral = 0.95; // Ajusta este valor según tus necesidades
+  console.log(similitudCoseno);
+  const umbral = 0.90; // Ajusta este valor según tus necesidades
   // Retornar true si la similitud supera el umbral, de lo contrario, false
   return similitudCoseno >= umbral;
 }
@@ -108,32 +110,41 @@ router.post("/UsersRegisters", async (req, res) => {
     vector2,
     vector3,
   } = req.body;
+  console.log('1')
   try {
+    console.log('2')
     const idDp = await pool.query(
       "INSERT INTO DatosPersonales(nombre,app,apm) VALUES(?,?,?)",
       [nombre, app, apm]
     );
+    console.log('3')
     const idDireccion = await pool.query(
       "INSERT INTO Direccion(calle,inte,exte,colonia,municipio,estado,cp,alt,lat)VALUES(?,?,?,?,?,?,?,?,?)",
       [calle, inte, exte, colonia, municipio, estado, cp, alt, lat]
     );
+    console.log('4')
     await pool.query("INSERT INTO Direcciones VALUES(?,?)", [
       idDp.insertId,
       idDireccion.insertId,
     ]);
+    console.log('5')
     const idContacto = await pool.query(
       "INSERT INTO Contacto(telefonoFijo,celular,email)VALUES(?,?,?)",
       [telefonoFijo, celular, email]
     );
+    console.log('6')
     const idVector = await pool.query(
       "INSERT INTO VectorCaracteristicas(vector1,vector2,vector3) VALUES(?,?,?)",
       [vector1, vector2, vector3]
     );
+    console.log('7')
     const usuario = await pool.query(
       "INSERT INTO Usuario(contrasena,idDp,idContacto,idRol,idVector)VALUES(?,?,?,?,?)",
       [contrasena, idDp.insertId, idContacto.insertId, idRol, idVector.insertId]
     );
+    console.log('8')
   } catch (err) {
+    console.log(err)
     res.json({ error: err.sqlMessage, query: err.sql });
     return;
   }

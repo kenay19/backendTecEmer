@@ -11,6 +11,8 @@ CREATE TABLE Direccion(
     municipio VARCHAR(50)  NOT NULL,
     estado VARCHAR(50)  NOT NULL,
     cp VARCHAR(50)  NOT NULL,
+    alt VARCHAR (50) ,
+    lat VARCHAR(50),
     PRIMARY KEY (idDireccion)
 )ENGINE=InnoDB;
 
@@ -51,6 +53,7 @@ CREATE TABLE Usuario(
     idDp INT  NOT NULL,
     idContacto INT  NOT NULL,
     idRol INT  NOT NULL,
+    idVector INT NOT NULL,
     PRIMARY KEY(idUsuario)
 )ENGINE=InnoDB;
 
@@ -58,7 +61,7 @@ CREATE TABLE EquipoMedico(
     idEquipoMedico INT AUTO_INCREMENT,
     nombre VARCHAR(50)  NOT NULL,
     estado VARCHAR(50)  NOT NULL,
-    costo  NUMERIC(5,2)  NOT NULL,
+    costo  VARCHAR(50)  NOT NULL,
     idVendedor  INT  NOT NULL,
     descripcion  VARCHAR(50),
     PRIMARY KEY(idEquipoMedico),
@@ -92,7 +95,7 @@ CREATE TABLE DonacionAsignada(
     FOREIGN KEY(idSolicitante) REFERENCES Usuario(idUsuario)
 )ENGINE=InnoDB;
 
-CREATE TABLE VectoresCaracteristicas(
+CREATE TABLE VectorCaracteristicas(
     idRegistro INT AUTO_INCREMENT,
     vector1 VARCHAR (255),
     vector2 VARCHAR (255),

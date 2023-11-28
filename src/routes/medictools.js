@@ -6,9 +6,57 @@ const fs = require("fs");
 const path = require("path");
 const multer = require('multer')()
 const {SpeechClient} = require('@google-cloud/speech')
+const cloudinary = require('cloudinary').v2;
+const axios = require('axios');
+var urls = []
+cloudinary.config({
+  cloud_name: 'dmh8kyegv',
+  api_key: '694143579324241',
+  api_secret: 's7QL8ZvHmcoCjYbpX8rdKVW-ihk'
+});
+
+async function uploadImageFromMatrix(matrixData, width, height,idEquipoMedico) {
+  try {
+    const imageBuffer = await sharp(Buffer.from(Object.values(matrixData)), {
+      raw: {
+        width,
+        height,
+        channels: 4 // Dependiendo de tu matriz de píxeles
+      }
+    }).png().toBuffer(); // Convertir a PNG (puedes cambiar a otros formatos)
+
+    // Crear un stream de carga para Cloudinary
+    const uploadStream = cloudinary.uploader.upload_stream({
+      width, // Ancho de la imagen
+      height, // Alto de la imagen
+      format: 'png', // Formato de imagen
+      // Otros parámetros opcionales
+    }, async (error, result) => {
+      if (error) {
+        console.error('Error al cargar la imagen:', error);
+      } else {
+        let resultado = await pool.query(
+          "INSERT INTO Imagenes(ruta)VALUES(?)",
+          result.url
+        );
+        await pool.query(
+          "INSERT INTO EM_Imagenes(idEquipoMedico,idImagen)VALUES(?,?)",
+          [idEquipoMedico, resultado.insertId]
+        );
+        
+      }
+    });
+
+    // Enviar el buffer de la imagen al stream de carga de Cloudinary
+    uploadStream.end(imageBuffer);
+  } catch (error) {
+    console.error('Error al procesar la imagen:', error);
+  }
+}
+
 router.post("/register", async (req, res) => {
   const { nombre, costo, idVendedor, descripcion, imagenes } = req.body;
-  let urls = [];
+  
 
   try {
     const result = await pool.query(
@@ -16,45 +64,7 @@ router.post("/register", async (req, res) => {
       [nombre, "En venta", costo, idVendedor, descripcion]
     );
     for (let i = 0; i < imagenes.length; i++) {
-      let imageName = `Vendedor_${idVendedor}_Nombre_${nombre}_Producto_${
-        result.insertId
-      }_imagen_${i + 1}.png`;
-      let dir = `../public/img/${imageName}`;
-      let width = imagenes[i].width;
-      let height = imagenes[i].height;
-
-      if (
-        !fs.existsSync(path.join(__dirname, "..", "public", "img", imageName))
-      ) {
-        fs.writeFileSync(
-          path.join(__dirname, "..", "public", "img", imageName),
-          ""
-        );
-      }
-      urls[i] = path.join("public", "img", imageName);
-      sharp(Buffer.from(Object.values(imagenes[i].matriz)), {
-        raw: { width, height, channels: 4 },
-      }).toFile(
-        path.join(__dirname, "..", "public", "img", imageName),
-        (err, info) => {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log(info);
-          }
-        }
-      );
-    }
-    console.log(urls.length);
-    for (let i = 0; i < urls.length; i++) {
-      let resultado = await pool.query(
-        "INSERT INTO Imagenes(ruta)VALUES(?)",
-        urls[i]
-      );
-      await pool.query(
-        "INSERT INTO EM_Imagenes(idEquipoMedico,idImagen)VALUES(?,?)",
-        [result.insertId, resultado.insertId]
-      );
+     uploadImageFromMatrix(imagenes[i].matriz,imagenes[i].width,imagenes[i].height,result.insertId)
     }
     res.json({
       message: "Equipo Medico Registrado Correctamente",
@@ -149,15 +159,15 @@ router.post('/getProduct',async (req,res) =>{
   }
 })
 
-router.post("/getImageProducts", (req, res) => {
-  console.log(req.body.ruta)
-  console.log(path.join(__dirname, "..", req.body.ruta));
-  res.sendFile(path.join(__dirname, "..", req.body.ruta), (err) => {
-    if (err) {
-      console.error(`Error al enviar la imagen: ${err.message}`);
-      res.status(404).send("Imagen no encontrada");
-    }
-  });
+router.post("/getImageProducts", async (req, res) => {
+  
+  const response = await axios.get(req.body.ruta, { responseType: 'arraybuffer' });
+
+  // Configurar la respuesta
+  res.set('Content-Type', 'image/jpeg'); // Cambia el tipo MIME según tu imagen (p. ej., 'image/png')
+
+    // Enviar la imagen como respuesta
+    res.end(Buffer.from(response.data, 'binary'));
 });
 
 router.put('/updateProduct',async(req,res) =>{
